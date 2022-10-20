@@ -1,4 +1,4 @@
-package com.mycompany.vehiculosgrafico;
+package com.mycompany.vehiculosbbdd;
 
 import java.util.Objects;
 

@@ -1,4 +1,4 @@
-package com.mycompany.vehiculosgrafico;
+package com.mycompany.vehiculosbbdd;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
