@@ -62,39 +62,17 @@ public class DAOVehiculoImpl  {
             Vehiculo v = buscarMatricula(matricula);
             System.out.println(v);
             String consulta =  "DELETE FROM vehiculo WHERE `vehiculo`.`Matricula` = '"+matricula+"'";    
-            boolean resultado=conexion.realizarInsercionEliminacion(consulta);
-            if (resultado==true) {
-                System.out.println("Se ha realizado correctamente");
-            } else{
-                System.out.println("Algo ha fallado");
-            }
+            conexion.realizarInsercionEliminacion(consulta);
+            
             
             
             return v ;
 	}
         
         public Vehiculo buscarMatricula(String matricula){
-            String consulta ="SELECT * FROM `vehiculo` WHERE vehiculo.Matricula='"+matricula+"'";
+           
             
-            boolean encontrado=false;
-            Vehiculo v = null;
-            
-            try {
-                ResultSet resultado = conexion.realizarConsulta(consulta);
-                int numRows = contadorFilas(resultado);
-                
-                if (numRows==0) {
-                    System.out.println("No existen vehiculos con esa matricula");
-                } else{
-                    v = new Vehiculo(resultado.getString(1), resultado.getString(2), resultado.getString(3));
-                }
-                
-            } catch (SQLException ex) {
-                System.out.println("Algo ha fallado al realizar la consulta");
-            }
-            
-            
-            return v;
+            return null;
         }
         
         private int contadorFilas(ResultSet result) throws SQLException{
