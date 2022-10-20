@@ -19,19 +19,21 @@ public class DAOVehiculoImpl  {
 	private static DAOVehiculoImpl dao=null; 
         private Conexion conexion;
 
-	private DAOVehiculoImpl() throws SQLException, NullPointerException {
-		super();
-		this.falsaBD = new ArrayList<Vehiculo>();
-		conexion = new Conexion("vehiculos", "root", "");
-                conexion.conectar();
+	private DAOVehiculoImpl() throws SQLException{
+            super();
+            this.falsaBD = new ArrayList<Vehiculo>();
+            conexion = new Conexion("vehiculos", "root", "");
+            conexion.conectar();
                 
-                ResultSet resultados = conexion.realizarConsulta("SELECT * FROM `vehiculo`");
                 
+            ResultSet resultados = conexion.realizarConsulta("SELECT * FROM `vehiculo`");
+                
+            if (resultados!=null) {
                 while (resultados.next()) {
-                this.falsaBD.add(new Vehiculo(resultados.getString(1),resultados.getString(2),resultados.getString(3)));
-                
+                this.falsaBD.add(new Vehiculo(resultados.getString(1),resultados.getString(2),resultados.getString(3))); 
             }
                 
+            } 
 		
 	}
 
@@ -46,21 +48,18 @@ public class DAOVehiculoImpl  {
 	}
         
         public void cerrarConexion() throws SQLException{
+            conexion.desconectar();
             
-            try {
-                conexion.desconectar();
-            } catch (SQLException e) {
-                System.out.println("Algo ha fallado al desconectar");
-            }
+            
         }
 
 	
 
 	
-	public Vehiculo eliminarVehiculo(String matricula) {
+	public Vehiculo eliminarVehiculo(String matricula) throws SQLException {
             
             Vehiculo v = buscarMatricula(matricula);
-            System.out.println(v);
+            
             String consulta =  "DELETE FROM vehiculo WHERE `vehiculo`.`Matricula` = '"+matricula+"'";    
             conexion.realizarInsercionEliminacion(consulta);
             
@@ -69,8 +68,26 @@ public class DAOVehiculoImpl  {
             return v ;
 	}
         
-        public Vehiculo buscarMatricula(String matricula){
+        public Vehiculo buscarMatricula(String matricula) throws SQLException{
+           String consultaContar = "SELECT COUNT(Matricula) FROM `vehiculo` WHERE vehiculo.Matricula='"+matricula+"';";
+            
+           ResultSet resultadoCount = conexion.realizarConsulta(consultaContar);
            
+           int num=0;
+            while (resultadoCount.next()) {                
+                num = Integer.parseInt(resultadoCount.getString(1));
+            }
+            System.out.println(num);
+            if(num==1){
+                String consulta = "SELECT * FROM `vehiculo` WHERE vehiculo.Matricula='"+matricula+"';";
+           
+           ResultSet resultado= conexion.realizarConsulta(consulta);
+           
+                while (resultado.next()) {       
+                  
+                  return new Vehiculo(resultado.getString(1),resultado.getString(2),resultado.getString(3));
+                }
+            } 
             
             return null;
         }
@@ -116,5 +133,15 @@ public class DAOVehiculoImpl  {
             }
             return borrado;
 	}
+        
+        public boolean editarVehiculo(String mAntigua, String mNueva, String modelo, String marca ){
+            String consulta = "UPDATE `vehiculo` SET `Marca` = '"+marca+"', `Modelo` = '"+modelo+"', `Matricula` = '"+mNueva+"' WHERE `vehiculo`.`Matricula` = '"+mAntigua+"'";
+            
+            int i=conexion.realizarUpdate(consulta);
+            if (i==0) {
+                System.out.println("Algo no fue bien");
+                return false;
+            } else{System.out.println("Todo fue bien"); return true;}
+        }
 
 }

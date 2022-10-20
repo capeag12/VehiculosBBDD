@@ -69,11 +69,13 @@ public class Conexion {
             
         } catch (SQLException e) {
             System.out.println("Algo ha fallado");
+            return false;
         } catch(NullPointerException a){
             System.out.println("No existe la conexion");
+            return false;
         }
         
-        return false;
+        
     }
     
     public int realizarUpdate(String query){
@@ -93,7 +95,7 @@ public class Conexion {
         return resultado;
     }
     
-    public void desconectar() throws SQLException{
+    public void desconectar() {
         try {
             conexion.close();
             System.out.println("Se desconectó correctamente");

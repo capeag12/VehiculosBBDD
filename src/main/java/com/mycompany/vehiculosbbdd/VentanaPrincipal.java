@@ -23,6 +23,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     private DefaultTableModel modelo;
     private boolean editando;
     private DAOVehiculoImpl bbdd;
+    private String matriculaEditando;
     /**
      * Creates new form VentanaPrincipal
      */
@@ -31,11 +32,12 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         gestion = new GestionVehiculos();
         añadirVehiculosIniciales();
         editando = false;
-        bbdd = DAOVehiculoImpl.getInstance();
-        
-        
-        
-        
+        try {
+            bbdd = DAOVehiculoImpl.getInstance();
+        }catch(SQLException e){
+            System.out.println("La query ha fallado");
+        } 
+
     }
     
     private void añadirVehiculosIniciales(){
@@ -75,6 +77,11 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         tblTabla = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel1.setText("Matricula:");
@@ -217,15 +224,11 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(rootPane, "No se ha podido añadir");
             }
         
-        
-        
         txtMarca.setText("");
         txtModelo.setText("");
         txtMatricula.setText("");
         }
-        
-        
-        
+       
     }//GEN-LAST:event_btnAñadirActionPerformed
 
     private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
@@ -233,39 +236,58 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(rootPane, "Debes seleccionar algo en la tabla");
         }else{
             String matricula = (String) modelo.getValueAt(tblTabla.getSelectedRow(), 2);
-            Vehiculo eliminado = bbdd.eliminarVehiculo(matricula);
+            Vehiculo eliminado = null;
+            try {
+                eliminado = bbdd.eliminarVehiculo(matricula);
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(rootPane, "La query ha fallado");
+            }
             
             if (eliminado!=null) {
                 gestion.eliminarVehiculo(matricula);
                 modelo.removeRow(tblTabla.getSelectedRow());
+            } else{
+                JOptionPane.showMessageDialog(rootPane, "No existia ningún vehiculo con esa matricula");
             }
-            
         }
-        
-        
-        
+      
     }//GEN-LAST:event_btnEliminarActionPerformed
 
     private void tblTablaPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_tblTablaPropertyChange
-        
+        int fila = tblTabla.getSelectedRow();
         if (evt.getPropertyName().equals("tableCellEditor")) {
             if (editando==false) {
                editando = true; 
                 System.out.println("Se está editando");
+                matriculaEditando = (String) tblTabla.getValueAt(fila, 2);
             }
             else{
                 editando=false;
                 System.out.println("Acaba de terminar de editar");
-                
-                int fila = tblTabla.getSelectedRow();
                 String matricula = (String) tblTabla.getValueAt(fila, 2);
                 String modelo = (String) tblTabla.getValueAt(fila, 1);
                 String marca = (String) tblTabla.getValueAt(fila, 0);
-                gestion.editarVehiculo(fila, matricula, modelo, marca);
-                System.out.println(gestion.getListaVehiculos().toString());
+                boolean editada= bbdd.editarVehiculo(matriculaEditando, matricula, modelo, marca);
+                if (editada==true) {
+                    gestion.editarVehiculo(fila, matricula, modelo, marca);
+                    System.out.println(gestion.getListaVehiculos().toString());
+                }
+                else{
+                    JOptionPane.showMessageDialog(rootPane,"Hubo algún error al terminar de editar");
+                }
+                
             }
         }
     }//GEN-LAST:event_tblTablaPropertyChange
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        try {
+            bbdd.cerrarConexion();
+            System.out.println("Conexion cerrada");
+        } catch (SQLException ex) {
+            Logger.getLogger(VentanaPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_formWindowClosing
     
     
     /**
