@@ -274,6 +274,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 }
                 else{
                     JOptionPane.showMessageDialog(rootPane,"Hubo algún error al terminar de editar");
+                    tblTabla.setValueAt(matriculaEditando, fila, 2);
                 }
                 
             }
